@@ -1,12 +1,12 @@
 
-# import required libraries
-import numpy
+# import required librariesi
+import numpy as numpy
 import matplotlib.pyplot as plt
 import cv2
 
 
 # read image
-image_name = '/figs/vehicular_traffic.jpg'
+image_name = 'figs/vehicular_traffic.jpg'
 img_colour = cv2.imread(image_name, cv2.IMREAD_COLOR)
 img_colour = cv2.cvtColor(img_colour, cv2.COLOR_BGR2RGB)
 
@@ -44,6 +44,9 @@ print('meam intensity value: ', img_colour.mean())
 
 # print type of image
 print('type of image: ', img_colour.dtype)
+
+
+
 
 # visualise colour image
 plt.figure(1)
