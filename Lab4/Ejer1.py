@@ -117,7 +117,7 @@ def run_pipeline(dataset_number=1):
 
 # main function
 def main():    
-    run_pipeline(dataset_number = 1)
+    run_pipeline(dataset_number = 2)
 
 
 if __name__=='__main__':

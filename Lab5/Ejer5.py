@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 # read image
-img_name = 'cavalo-motorizado.jpg'
+img_name = 'Figs/cavalo-motorizado.jpg'
 img = cv2.imread(img_name)
 
 # verify that image `img` exist
@@ -24,7 +24,7 @@ if img is None:
 
 # define level of salt & pepper noise
 s_vs_p = 0.2								
-amount = 0.07								# <--- change this value
+amount = 0.2								# <--- change this value
 
 # create a copy of input image
 out = img.copy()
@@ -40,7 +40,7 @@ coords = [np.random.randint(0, i - 1, int(num_pepper)) for i in img.shape]
 out[coords] = 0
 
 # apply cv2.medianBlur() for noise removal
-ksize = 3									# <--- change this value
+ksize = 3					# <--- change this value
 img_median = cv2.medianBlur(out, ksize)
 
 # plot input and blurred images

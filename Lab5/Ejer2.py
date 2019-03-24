@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 # read image
-img_name = 'cavalo-motorizado.jpg'
+img_name = 'Figs/cavalo-motorizado.jpg'
 img = cv2.imread(img_name)
 
 # verify that image `img` exist
@@ -22,12 +22,18 @@ if img is None:
 	print('ERROR: image ', img_name, 'could not be read')
 	exit()
 
+f = np.array([[1, 2, 1], [2, 4, 2],
+	          [1, 2, 1]], np.float32)/16
 # define a 5x5 kernel
-kernel = np.ones((5,5), np.float32)/25
-dst_correlation = cv2.filter2D(img, -1, kernel)
+kernel = np.ones((21,21), np.float32)/441
+dst_correlation = cv2.filter2D(img, -1, f)
+
+
+
+print(f)
 
 # rotate kernel
-kernel_rotated = cv2.flip(kernel, -1)
+kernel_rotated = cv2.flip(f, -1)
 dst_convolution = cv2.filter2D(img, -1, kernel_rotated)
 
 # plot input and convolved images
