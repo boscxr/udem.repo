@@ -40,13 +40,35 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
+# config video object
+def config_video_source(source_video_file):
+
+    # initialise a video capture object
+    cap = cv2.VideoCapture(source_video_file)
+
+    # check that the videocapture object was successfully created
+    if(not cap.isOpened()):
+        print("Error opening video source")
+        exit()
+
+    # return videocapture object
+    return cap
+
+
+# free memory and close open windows
+def free_memory_amd_close_windows(cap):
+
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()
+
 
 
 # run line detection pipeline
 def run_pipeline(img_name):
 
     # 1.- Read image
-    img_colour = cv2.imread(img_name)
+    img_colour = img_name
 
     # verify that image `img` exist
     if img_colour is None:
@@ -175,7 +197,7 @@ def run_pipeline(img_name):
     # plt.imshow(img_colour_rgb)
     # plt.axis('off')
 
-    # plt.figure(2)
+    # plt.figure(2)qqqq
     # plt.imshow(blur_grey, cmap='gray')
     # plt.axis('off')
 
@@ -183,16 +205,50 @@ def run_pipeline(img_name):
     # plt.imshow(edges, cmap='gray')
     # plt.axis('off')
 
-    plt.figure(1)
-    plt.imshow(img_colour_with_lines)
-    plt.axis('off')
+    # plt.figure(1)
+    # plt.imshow(img_colour_with_lines)
+    # plt.axis('off')
 
+
+    # create new windows for visualisation purposes
 
     plt.show()
-    return None
+    return img_colour_with_lines
 
-img_name = 'highway_frame_0001.png'
-run_pipeline(img_name)
+
+cap = config_video_source(source_video_file="highway-right-solid-white-line-short.mp4")
+cv2.namedWindow('input video', cv2.WINDOW_NORMAL)
+cv2.namedWindow('segmented object', cv2.WINDOW_NORMAL)
+
+# main loop
+while(cap.isOpened()):
+
+    # grab current frame
+    ret, frame = cap.read()
+
+    # verify that frame was properly captured
+    if ret == False:
+        print("ERROR: current frame could not be read")            
+        break
+
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # fun pipeline
+    run_pipeline(frame)
+
+    # visualise current frame
+    cv2.imshow('input video',img_colour_with_lines)
+
+    # Display the resulting frame
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        cv2.imwrite('volti-swimming.png', img_colour_with_lines)
+        break
+
+free_memory_amd_close_windows(cap)
+
+
+
+
 
 
 
