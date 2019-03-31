@@ -1,19 +1,17 @@
 """
-	line_detection_using_hough_transform.py
+    object-segmentation-using-hsv-colour-space.py
 
-	author: andres.hernandezg@udem.edu
-	universidad de monterrey
+    add a description of your code here
+
+    author: add your fullname
+    date created: add this info
+    universidad de monterrey
 """
 
 # import required libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-import math
-
-
-
-
 
 
 
@@ -43,33 +41,31 @@ def region_of_interest(img, vertices):
     return masked_image
 
 
-
-
 # run line detection pipeline
 def run_pipeline(img_name):
 
     # 1.- Read image
-    img_colour = img_name
+    img_colour = cv2.imread(img_name)
 
     # verify that image `img` exist
     if img_colour is None:
         print('ERROR: image ', img_name, 'could not be read')
         exit()
 
-	# 2. Convert from BGR to RGB then from RGB to greyscale
+    # 2. Convert from BGR to RGB then from RGB to greyscale
     img_colour_rgb = cv2.cvtColor(img_colour, cv2.COLOR_BGR2RGB)
     grey = cv2.cvtColor(img_colour_rgb, cv2.COLOR_RGB2GRAY)
 
-	# 3.- Apply Gaussuan smoothing
+    # 3.- Apply Gaussuan smoothing
     kernel_size = (7,7)
     blur_grey = cv2.GaussianBlur(grey, kernel_size, sigmaX=0, sigmaY=0)
 
-	# 4.- Apply Canny edge detector
+    # 4.- Apply Canny edge detector
     low_threshold = 10
     high_threshold = 70
     edges = cv2.Canny(blur_grey, low_threshold, high_threshold, apertureSize=3)
 
-	# 5.- Define a polygon-shape like region of interest
+    # 5.- Define a polygon-shape like region of interest
     img_shape = grey.shape
 
     # uncomment the following lines when extracting lines around the whole image
@@ -81,7 +77,7 @@ def run_pipeline(img_name):
     # bottom_right = (img_size[1], img_size[0])
     
 
-	# comment the following lines when extracting  lines around the whole image
+    # comment the following lines when extracting  lines around the whole image
 
     bottom_left = (388, 626)
     top_left = (600, 460)
@@ -91,11 +87,11 @@ def run_pipeline(img_name):
     # create a vertices array that will be used for the roi
     vertices = np.array([[bottom_left,top_left, top_right, bottom_right]], dtype=np.int32)
 
-	# 6.- Get a region of interest using the just created polygon. This will be
-	#     used together with the Hough transform to obtain the estimated Hough lines
+    # 6.- Get a region of interest using the just created polygon. This will be
+    #     used together with the Hough transform to obtain the estimated Hough lines
     masked_edges = region_of_interest(edges, vertices)
 
-	# 7.- Apply Hough transform for lane lines detection
+    # 7.- Apply Hough transform for lane lines detection
     rho = 1                       # distance resolution in pixels of the Hough grid
     theta = np.pi/180             # angular resolution in radians of the Hough grid
     threshold = 40                # minimum number of votes (intersections in Hough grid cell)
@@ -106,7 +102,7 @@ def run_pipeline(img_name):
     print(hough_lines)
 
 
-	# 8.- Visualise input and output images he is putting all lines in matplot
+    # 8.- Visualise input and output images he is putting all lines in matplot
     # img_colour_with_lines = img_colour_rgb.copy()
     # for line in hough_lines:
     #     for x1, y1, x2, y2 in line:
@@ -173,7 +169,7 @@ def run_pipeline(img_name):
                         
     cv2.fillPoly(img_colour_with_lines, [points], (254, 55, 156))
 
-	#visualise input and output images
+    #visualise input and output images
     # plt.figure(1)
     # plt.imshow(img_colour_rgb)
     # plt.axis('off')
@@ -191,34 +187,101 @@ def run_pipeline(img_name):
 
     return img_colour_with_lines
 
-
-cap = cv2.VideoCapture("highway-right-solid-white-line-short.mp4")
-
-while(True):
-    # capture new frame
-    ret, frame = cap.read()
-
-    # convert from colour to grayscale image
-    #gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-
-    # visualise image
-   
-    imgjeje = run_pipeline(frame)
-    cv2.imshow('frame', imgjeje)
-
-    # wait for the user to press 'q' to close the window
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-cap.release()
-# destroy windows to free memory
-cv2.destroyAllWindows()
+#################################################################################
 
 
+# config video object
+def config_video_source(source_video_file):
+
+    # initialise a video capture object
+    cap = cv2.VideoCapture(source_video_file)
+
+    # check that the videocapture object was successfully created
+    if(not cap.isOpened()):
+        print("Error opening video source")
+        exit()
+
+    # return videocapture object
+    return cap
+
+
+# process video
+def process_video(cap):
+
+
+    # create new windows for visualisation purposes
+    cv2.namedWindow('input video', cv2.WINDOW_NORMAL)
+    cv2.namedWindow('segmented object', cv2.WINDOW_NORMAL)
+
+    # main loop
+    while(cap.isOpened()):
+
+        # grab current frame
+        ret, frame = cap.read()
+
+        # verify that frame was properly captured
+        if ret == False:
+            print("ERROR: current frame could not be read")            
+            break
+
+        # convert BGR to HSV
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+        # threshold the hsv image so that only blue pixels are kept
+        #mask = cv2.inRange(hsv, hsv_min, hsv_max)
 
 
 
+        # AND-bitwise operation between the mask and input images
+        #segmented_objects = cv2.bitwise_and(frame, frame, mask=mask)
+
+        segmented_objects = run_pipeline(hsv)
+
+        # visualise current frame
+        cv2.imshow('input video',frame)
+
+        # visualise segmented blue object
+        cv2.imshow('segmented object', segmented_objects)
+
+        # Display the resulting frame
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.imwrite('volti-swimming.png', frame)
+            cv2.imwrite('volti-swimming-segmented.png', segmented_objects)
+            break
 
 
+# free memory and close open windows
+def free_memory_amd_close_windows(cap):
+
+    # When everything done, release the capture
+    cap.release()
+    cv2.destroyAllWindows()
 
 
+# run pipeline
+def run_pipeline(dataset_number=1):
+
+
+    # select video sequence
+    if(dataset_number==1):
+        # blue
+        cap = config_video_source(source_video_file="highway-right-solid-white-line-short.mp4")
+        process_video(cap)
+    
+
+    else:
+        # enter a valid option
+        print("Please, enter a valid option mate! [1-4]")
+        exit()
+
+    # free memory and close windows
+    free_memory_amd_close_windows(cap)
+
+
+# main function
+def main():    
+    run_pipeline(dataset_number = 1)
+
+
+if __name__=='__main__':
+    main()
